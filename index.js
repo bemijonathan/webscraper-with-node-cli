@@ -1,5 +1,6 @@
+const chalk = require('chalk');
 var inquirer = require('inquirer');
-const { getAllCourses } = require('./controllers/course.controller');
+const { getAllCourses, getSingleCourse } = require('./controllers/course.controller');
 const BottomBar = inquirer.ui.BottomBar;
 
 
@@ -12,7 +13,7 @@ inquirer
     .prompt({
         type: 'list',
         name: 'type',
-        message: "What's do you want to check out ?",
+        message: `What's do you want to check out ?`,
         choices: ['featured', 'List all Courses', 'Search for course', 'list all Subjects and Areas'],
     })
     .then((answer) => {
@@ -25,12 +26,31 @@ inquirer
                 let c = e.map(d => d.title)
                 inquirer.prompt({
                     type: 'list',
-                    name: 'beverage',
-                    message: 'And your favorite beverage?',
+                    name: 'title',
+                    message: 'Select a course to see more detail ?',
                     choices: [...c],
                     loop: false
-                });
-            })
+                }).then(course => {
+                    let load = setInterval(() => {
+                        ui.updateBottomBar(loader[i++ % 4]);
+                    }, 300);
+                    let url = e.find(i => i.title === course.title).url
+                    getSingleCourse(url).then((detail) => {
+                        clearInterval(load)
+                        inquirer.prompt({
+                            type: 'list',
+                            name: 'title',
+                            message: `${JSON.stringify(detail)}`,
+                            choices: ['home', 'search course'],
+                            loop: false
+                        })
+                    })
+                })
+            }).catch(err => {
+
+                console.log(chalk.redBright(err))
+                process.exit()
+            });
         } else {
             console.log(answer)
         }

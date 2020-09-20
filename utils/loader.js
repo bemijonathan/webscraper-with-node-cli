@@ -1,5 +1,6 @@
 const { Buffer } = require('buffer');
-const fs = require('fs');
+const chalk = require('chalk');
+const fs = require('fs').promises;
 
 /**
  * @param {string} fileName name of the file
@@ -7,10 +8,17 @@ const fs = require('fs');
  * 
  */
 
-const writefile = (fileName, fileContent) => {
-    fs.writeFile('data/' + fileName + '.json', JSON.stringify(fileContent), (err, data) => {
-        console.log('err: failed to write the file')
-    })
+const writefile = async (fileName, fileContent) => {
+    try {
+        await fs.writeFile('data/' + fileName + '.json', JSON.stringify(fileContent))
+    } catch (error) {
+        if (error) {
+            console.log(chalk.redBright(`\n err: failed to write the file`, error))
+            process.exit()
+        } else {
+            console.log(chalk.greenBright(`\n saved: response is saved here data/${fileName}.json`))
+        }
+    }
 }
 
 
